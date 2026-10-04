@@ -26,29 +26,38 @@ def get_frequency_data_for(
     reading: str,
 ) -> list[list[Any]]:
     """
-    Return all entries whose:
-
-    - top-level expression is `expression`
-    - metadata reading is `reading`
+    Return all entries where:
+    - entry[0] == expression
+    - entry[2].get("reading") == reading
+      OR
+    - entry[2].get("reading") is None AND expression is pure kana
     """
     matches = []
-
+    
     for entry in data:
         if not isinstance(entry, list) or len(entry) < 3:
             continue
-
-        top_level_expression = entry[0]
+        
+        if entry[0] != expression:
+            continue
+        
         metadata = entry[2]
-
         if not isinstance(metadata, dict):
             continue
-
-        if (
-            top_level_expression == expression
-            and metadata.get("reading") == reading
-        ):
+        
+        entry_reading = metadata.get("reading")
+        
+        # Case 1: Reading matches exactly
+        if entry_reading == reading:
             matches.append(entry)
-
+            continue
+        
+        # Case 2: Kana-only words (no reading field)
+        # If expression is pure kana and reading is the same, it's a match
+        if entry_reading is None and expression == reading:
+            matches.append(entry)
+            continue
+    
     return matches
 
 def copy_to_clipboard(text: str) -> None:

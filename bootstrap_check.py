@@ -18,7 +18,7 @@ from pathlib import Path
 try:
     from quality_scorer import DEFAULT_FREQUENCY_THRESHOLD
 except ImportError:
-    DEFAULT_FREQUENCY_THRESHOLD = 8000
+    DEFAULT_FREQUENCY_THRESHOLD = 10000
 
 
 def format_timestamp(mtime: float) -> str:

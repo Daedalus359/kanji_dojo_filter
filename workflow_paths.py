@@ -18,7 +18,7 @@ from typing import Any
 try:
     from quality_scorer import DEFAULT_FREQUENCY_THRESHOLD
 except ImportError:
-    DEFAULT_FREQUENCY_THRESHOLD = 8000
+    DEFAULT_FREQUENCY_THRESHOLD = 10000
 
 
 def print_section(title: str) -> None:
@@ -322,7 +322,7 @@ def main() -> None:
     print("  --database user_data.sqlite \\")
     print("  --jmdict-directory data/JMDict \\")
     print("  --frequency-data ../frequency_data/term_meta_bank_1.json \\")
-    print("  --threshold 8000 \\")
+    print("  --threshold 10000 \\")
     print("  --output analysis_report.txt \\")
     print("  --verbose\n")
 

@@ -202,7 +202,10 @@ def evaluate_deck(
     results: list[ScoringResult] = []
 
     print("Evaluating entries...", file=sys.stderr)
-    for expression, reading in sorted(pair_set):
+    loop_len = len(sorted(pair_set))
+    for (i, (expression, reading)) in enumerate(sorted(pair_set)):
+        if i % 250 == 0:
+            print(i, "of", loop_len)
         jpdb_rank = extract_jpdb_frequency_rank(freq_data, expression, reading)
 
         # Check JMdict match

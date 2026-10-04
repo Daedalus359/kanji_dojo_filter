@@ -13,7 +13,7 @@ from typing import Any, Iterable
 
 import filter_lib
 
-DEFAULT_FREQUENCY_THRESHOLD = 8000
+DEFAULT_FREQUENCY_THRESHOLD = 10000
 
 
 @dataclass

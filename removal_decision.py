@@ -29,7 +29,7 @@ class RemovalDecisionLog:
 
     decisions: list[RemovalDecision] = field(default_factory=list)
     completed_decks: set[int | None] = field(default_factory=set)
-    frequency_threshold: int = 8000
+    frequency_threshold: int = 10000
     jmdict_directory: str = ""
     frequency_data_path: str = ""
 
@@ -45,7 +45,7 @@ class RemovalDecisionLog:
     @staticmethod
     def from_dict(data: dict[str, Any]) -> RemovalDecisionLog:
         log = RemovalDecisionLog(
-            frequency_threshold=data.get("frequency_threshold", 8000),
+            frequency_threshold=data.get("frequency_threshold", 10000),
             jmdict_directory=data.get("jmdict_directory", ""),
             frequency_data_path=data.get("frequency_data_path", ""),
         )

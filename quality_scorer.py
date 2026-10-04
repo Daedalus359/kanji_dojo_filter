@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass, field
 from typing import Any
 
-DEFAULT_FREQUENCY_THRESHOLD = 8000
+DEFAULT_FREQUENCY_THRESHOLD = 10000
 
 
 @dataclass

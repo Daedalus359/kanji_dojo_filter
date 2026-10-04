@@ -63,6 +63,12 @@ LOW_PRIORITY_SENSE_INDICATOR_TAGS = [
     "arch",#archaic
 ]
 
+SCORING_CONSTS = {
+    "uk_tag_kanji_word": 1.0,
+}
+
+JPDB_CUTOFF_FREQ_RANK = 15000
+
 #worth considering whether these make a word sense worth valuing over others
 # HIGH_PRIORITY_SENSE_INDICATOR_TAGS = [
 #     "⭐",

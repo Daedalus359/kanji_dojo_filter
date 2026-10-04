@@ -10,6 +10,8 @@ from typing import Any, Iterable
 
 from quality_scorer import ScoringResult
 
+from constants import JPDB_CUTOFF_FREQ_RANK
+
 
 class OutputFormat(str, Enum):
     TEXT = "text"
@@ -21,12 +23,8 @@ def _print_text_result(result: ScoringResult, verbose: bool = False) -> None:
     """Print a single ScoringResult in human-readable text format."""
     print(
         f"{result.expression:20} [{result.reading:15}] | "
-        f"score={result.total_score:.3f} | jpdb={result.jpdb_rank}"
+        f"jpdb={result.jpdb_rank}"
     )
-    if verbose and result.reasons:
-        print(f"    reasons: {'; '.join(result.reasons)}")
-    if verbose and result.component_scores:
-        print(f"    components: {result.component_scores}")
 
 
 def print_report(
@@ -58,7 +56,7 @@ def print_report(
 
 
 def _write_text_report(
-    results: list[ScoringResult],
+    results: list[ExpressionInfo],
     output_file: Path | None = None,
     verbose: bool = False,
     summary: bool = True,
@@ -71,10 +69,20 @@ def _write_text_report(
 
     try:
         if summary:
-            nonzero_count = sum(1 for r in results if r.total_score > 0)
-            print_line(f"Analysis Summary:")
-            print_line(f"  Total entries: {len(results)}")
-            print_line(f"  Entries with nonzero score: {nonzero_count}")
+            uk_count = sum(1 for r in results if r.has_uk_tag)
+            print_line(f"\tTotal entries with a uk tag to review: {uk_count}")
+            rare_words_count = sum(1 for r in results if r.jpdb_rank is not None and r.jpdb_rank > JPDB_CUTOFF_FREQ_RANK)
+            print(f"\tTotal entries with frequency rank above {JPDB_CUTOFF_FREQ_RANK}: {rare_words_count}")
+            no_jmdict_match_ct = sum(1 for r in results if not r.has_jmdict_match)
+            print(f"\tTotal entries with no match found in JMDict: {no_jmdict_match_ct}")
+            low_priority_form_ct = sum(1 for r in results if not r.forms_high_priority)
+            print(f"\tTotal entries considered a low-priority form: {low_priority_form_ct}")
+            ambiguous_expression_ct = sum(1 for r in results if r.is_ambiguous_expression)
+            print(f"\tTotal entries where the expression was amiguous: {ambiguous_expression_ct}")
+            ambiguous_reading_ct = sum(1 for r in results if r.is_ambiguous_reading)
+            print(f"\tTotal entries where the reading was shared by multiple expressions: {ambiguous_reading_ct}")
+
+
             print_line()
 
         if verbose:
@@ -83,8 +91,13 @@ def _write_text_report(
             print_line(f"Entries with nonzero score (for manual review):")
 
         print_line()
+        print("Results considered low-priority:")
         for result in results:
-            if result.total_score > 0:
+            if not result.forms_high_priority:
+                _print_text_result(result, verbose=verbose)
+        print("Results tagged uk for at least one non-archaic sense (compare against Kanji Dojo DB definition to decide:")
+        for result in results:
+            if result.has_uk_tag:
                 _print_text_result(result, verbose=verbose)
 
     finally:

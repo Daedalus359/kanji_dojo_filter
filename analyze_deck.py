@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import sys
 from pathlib import Path
+from pprint import pprint
 
 from batch_evaluator import evaluate_deck
 from quality_scorer import DEFAULT_FREQUENCY_THRESHOLD, ScoringWeights
@@ -95,6 +96,11 @@ def main() -> None:
         verbose=args.verbose,
         summary=args.summary,
     )
+
+    # for result in results:
+    #     pprint(result)
+
+
 
 
 if __name__ == "__main__":

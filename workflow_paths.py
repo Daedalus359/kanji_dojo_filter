@@ -14,11 +14,13 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from constants import JPDB_CUTOFF_FREQ_RANK
+
 # Import constants and defaults from the workflow modules
 try:
     from quality_scorer import DEFAULT_FREQUENCY_THRESHOLD
 except ImportError:
-    DEFAULT_FREQUENCY_THRESHOLD = 10000
+    DEFAULT_FREQUENCY_THRESHOLD = JPDB_CUTOFF_FREQ_RANK
 
 
 def print_section(title: str) -> None:
@@ -322,7 +324,7 @@ def main() -> None:
     print("  --database user_data.sqlite \\")
     print("  --jmdict-directory data/JMDict \\")
     print("  --frequency-data ../frequency_data/term_meta_bank_1.json \\")
-    print("  --threshold 10000 \\")
+    print(f"  --threshold {JPDB_CUTOFF_FREQ_RANK} \\")
     print("  --output analysis_report.txt \\")
     print("  --verbose\n")
 

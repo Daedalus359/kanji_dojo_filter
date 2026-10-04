@@ -4,8 +4,9 @@ from __future__ import annotations
 
 import sys
 from collections import defaultdict
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 import filter_lib
 from deck_reader import load_deck_pairs
@@ -13,8 +14,19 @@ from quality_scorer import (
     DEFAULT_FREQUENCY_THRESHOLD,
     ScoringResult,
     ScoringWeights,
-    compute_score,
+    #compute_score,
 )
+
+@dataclass(frozen=True, slots=True)
+class ExpressionInfo:
+    expression: str
+    reading: str
+    jpdb_rank: Optional[int]
+    has_jmdict_match: bool
+    has_uk_tag: bool
+    forms_high_priority: bool
+    is_ambiguous_expression: bool
+    is_ambiguous_reading: bool
 
 
 JPDBIndex = dict[tuple[str, str], int]
@@ -97,12 +109,13 @@ def find_ambiguous_pairs(
     return expressions_with_multiple_readings, readings_with_multiple_expressions
 
 
-def _forms_table_has_star(
+def _not_beaten_in_forms_table(
     record: list[Any], expression: str, reading: str
 ) -> bool:
     """Check if the forms table marks the (expression, reading) pair with a star."""
     if len(record) <= 5 or record[2] != "forms":
-        return False
+        #in this case, there is no forms table
+        return True
 
     forms_table = _parse_structured_forms_table(record[5])
     if forms_table is None:
@@ -292,7 +305,7 @@ def evaluate_deck(
                 tags = record[2].split()
                 has_uk_tag = has_uk_tag or "uk" in tags
 
-            if _forms_table_has_star(record, expression, reading):
+            if _not_beaten_in_forms_table(record, expression, reading):
                 forms_high_priority = True
                 break
 
@@ -300,23 +313,38 @@ def evaluate_deck(
             forms_high_priority = False
 
         # Compute score
-        score_result = compute_score(
+        # score_result = compute_score(
+        #     jpdb_rank=jpdb_rank,
+        #     has_jmdict_match=has_jmdict_match,
+        #     has_uk_tag=has_uk_tag,
+        #     forms_high_priority=forms_high_priority,
+        #     is_ambiguous_expression=expression in expr_to_readings,
+        #     is_ambiguous_reading=reading in reading_to_expressions,
+        #     weights=weights,
+        #     threshold=threshold,
+        # )
+
+        info = ExpressionInfo(
+            expression=expression,
+            reading=reading,
             jpdb_rank=jpdb_rank,
             has_jmdict_match=has_jmdict_match,
             has_uk_tag=has_uk_tag,
             forms_high_priority=forms_high_priority,
             is_ambiguous_expression=expression in expr_to_readings,
             is_ambiguous_reading=reading in reading_to_expressions,
-            weights=weights,
-            threshold=threshold,
         )
 
-        score_result.expression = expression
-        score_result.reading = reading
 
-        results.append(score_result)
+
+        # score_result.expression = expression
+        # score_result.reading = reading
+
+        # results.append(score_result)
+        results.append(info)
 
     # Sort by score descending, then expression, then reading
-    results.sort(key=lambda r: (-r.total_score, r.expression, r.reading))
+    # results.sort(key=lambda r: (-r.total_score, r.expression, r.reading))
 
     return results
+

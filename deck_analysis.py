@@ -13,7 +13,9 @@ from typing import Any, Iterable
 
 import filter_lib
 
-DEFAULT_FREQUENCY_THRESHOLD = 10000
+from constants import SCORING_CONSTS, JPDB_CUTOFF_FREQ_RANK
+
+DEFAULT_FREQUENCY_THRESHOLD = JPDB_CUTOFF_FREQ_RANK
 
 
 @dataclass
@@ -286,7 +288,7 @@ def analyze_pair(
         reasons.append("no JMdict match")
     else:
         if has_uk_tag:
-            score -= 0.15
+            score += SCORING_CONSTS["uk_tag_kanji_word"]
             reasons.append("JMdict marks this as usually kana-only")
         elif forms_high_priority is False:
             score += 0.20
@@ -303,7 +305,7 @@ def analyze_pair(
         score += 0.10
         reasons.append("forms table does not prefer this expression/reading pair")
 
-    score = max(0.0, min(1.0, score))
+    #score = max(0.0, min(1.0, score))
     recommendation = _select_recommendation(score)
 
     return DeckEntryAnalysis(

@@ -15,10 +15,12 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
+from constants import JPDB_CUTOFF_FREQ_RANK
+
 try:
     from quality_scorer import DEFAULT_FREQUENCY_THRESHOLD
 except ImportError:
-    DEFAULT_FREQUENCY_THRESHOLD = 10000
+    DEFAULT_FREQUENCY_THRESHOLD = JPDB_CUTOFF_FREQ_RANK
 
 
 def format_timestamp(mtime: float) -> str:

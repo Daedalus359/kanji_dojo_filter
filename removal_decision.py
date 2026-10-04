@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import asdict, dataclass, field
 from typing import Any, Literal
+from constants import JPDB_CUTOFF_FREQ_RANK
 
 
 @dataclass
@@ -29,7 +30,7 @@ class RemovalDecisionLog:
 
     decisions: list[RemovalDecision] = field(default_factory=list)
     completed_decks: set[int | None] = field(default_factory=set)
-    frequency_threshold: int = 10000
+    frequency_threshold: int = JPDB_CUTOFF_FREQ_RANK
     jmdict_directory: str = ""
     frequency_data_path: str = ""
 
@@ -45,7 +46,7 @@ class RemovalDecisionLog:
     @staticmethod
     def from_dict(data: dict[str, Any]) -> RemovalDecisionLog:
         log = RemovalDecisionLog(
-            frequency_threshold=data.get("frequency_threshold", 10000),
+            frequency_threshold=data.get("frequency_threshold", JPDB_CUTOFF_FREQ_RANK),
             jmdict_directory=data.get("jmdict_directory", ""),
             frequency_data_path=data.get("frequency_data_path", ""),
         )

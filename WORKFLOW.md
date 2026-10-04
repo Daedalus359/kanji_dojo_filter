@@ -29,7 +29,7 @@ python3 analyze_deck.py \
   --source-table vocab_deck_entry \
   --jmdict-directory data/JMDict \
   --frequency-data ../frequency_data/term_meta_bank_1.json \
-  --threshold 10000 \
+  --threshold 11000 \
   --output analysis_report.txt \
   --verbose
 ```
@@ -37,13 +37,13 @@ python3 analyze_deck.py \
 **Inputs**:
 - `user_data.sqlite`: Your Kanji Dojo database (read-only)
 - `data/JMDict/term_bank_*.json`: JMdict vocabulary data (read-only)
-- `../frequency_data/term_meta_bank_1.json`: JPDBv2 top-10000 frequency rankings (read-only)
+- `../frequency_data/term_meta_bank_1.json`: JPDBv2 top-11000 frequency rankings (read-only)
 
 **Output**:
 - `analysis_report.txt`: Human-readable list of all entries with nonzero scores
 
 **Key options**:
-- `--threshold 10000`: Words ranked in JPDBv2's top 8,000 get zero frequency penalty
+- `--threshold 11000`: Words ranked in JPDBv2's top 8,000 get zero frequency penalty
 - `--verbose`: Show detailed reasoning (component scores, reasons)
 
 ---

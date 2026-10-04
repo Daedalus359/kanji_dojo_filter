@@ -10,6 +10,8 @@ from pathlib import Path
 
 from typing import Any
 
+from collections import defaultdict
+
 def load_frequency_data(file_path: str | Path) -> list[list[Any]]:
     """Load the JSON array from a file."""
     with open(file_path, "r", encoding="utf-8") as file:

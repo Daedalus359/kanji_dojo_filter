@@ -17,32 +17,33 @@ from quality_scorer import (
 )
 
 
-def extract_jpdb_frequency_rank(
-    freq_data: list[list[Any]], expression: str, reading: str
-) -> int | None:
-    """Return the JPDBv2 ranking for the given (expression, reading) pair."""
-    best_rank: int | None = None
+JPDBIndex = dict[tuple[str, str], int]
+
+
+def build_jpdb_frequency_index(
+    freq_data: list[list[Any]],
+) -> JPDBIndex:
+    """Map (expression, reading) to its lowest JPDBv2 rank."""
+    index: JPDBIndex = {}
 
     for entry in freq_data:
         if not isinstance(entry, list) or len(entry) < 3:
             continue
 
-        top_level_expression = entry[0]
+        expression = entry[0]
         metadata = entry[2]
 
-        if not isinstance(metadata, dict):
-            continue
-        if top_level_expression != expression:
+        if not isinstance(expression, str) or not isinstance(metadata, dict):
             continue
 
-        if metadata.get("reading") != reading:
-            continue
-
+        reading = metadata.get("reading")
         frequency = metadata.get("frequency")
-        if not isinstance(frequency, dict):
+
+        if not isinstance(reading, str) or not isinstance(frequency, dict):
             continue
 
         value = frequency.get("value")
+
         if isinstance(value, int):
             rank = value
         elif isinstance(value, str):
@@ -53,10 +54,21 @@ def extract_jpdb_frequency_rank(
         else:
             continue
 
-        if best_rank is None or rank < best_rank:
-            best_rank = rank
+        key = (expression, reading)
+        previous = index.get(key)
 
-    return best_rank
+        if previous is None or rank < previous:
+            index[key] = rank
+
+    return index
+
+
+def extract_jpdb_frequency_rank(
+    index: JPDBIndex,
+    expression: str,
+    reading: str,
+) -> int | None:
+    return index.get((expression, reading))
 
 
 def find_ambiguous_pairs(
@@ -201,17 +213,59 @@ def evaluate_deck(
 
     results: list[ScoringResult] = []
 
+    normalized_term_records = [
+        {
+            **item,
+            "record": [
+                filter_lib.normalize(item["record"][0]),
+                filter_lib.normalize(item["record"][1]),
+                *item["record"][2:],
+            ],
+        }
+        for item in term_records
+    ]
+
+    # Build this once instead of scanning 500k records for every pair.
+    jmdict_exact_index = defaultdict(list)
+
+
+    for item in normalized_term_records:
+        record = item["record"]
+
+        if len(record) < 2:
+            continue
+
+        key = (record[0], record[1])
+        jmdict_exact_index[key].append(item)
+
+    jpdb_index = build_jpdb_frequency_index(freq_data)
+
+    sorted_pairs = sorted(pair_set)
+
     print("Evaluating entries...", file=sys.stderr)
-    loop_len = len(sorted(pair_set))
-    for (i, (expression, reading)) in enumerate(sorted(pair_set)):
+    loop_len = len(sorted_pairs)
+    for (i, (expression, reading)) in enumerate(sorted_pairs):
         if i % 250 == 0:
             print(i, "of", loop_len)
-        jpdb_rank = extract_jpdb_frequency_rank(freq_data, expression, reading)
+        jpdb_rank = extract_jpdb_frequency_rank(
+            jpdb_index, 
+            expression, 
+            reading,
+            )
+        #jpdb_rank = extract_jpdb_frequency_rank(freq_data, expression, reading)
 
-        # Check JMdict match
-        matches = filter_lib.find_term_records(
-            term_records, expression, reading, partial=False
+        # # Check JMdict match
+        # matches = filter_lib.find_term_records(
+        #     term_records, expression, reading, partial=False
+        # )
+        # has_jmdict_match = bool(matches)
+
+        key = (
+            filter_lib.normalize(expression),
+            filter_lib.normalize(reading),
         )
+
+        matches = jmdict_exact_index.get(key, ())
         has_jmdict_match = bool(matches)
 
         # Remove low-priority (archaic) matches

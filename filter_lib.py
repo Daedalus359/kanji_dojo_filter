@@ -12,6 +12,11 @@ from typing import Any
 
 from collections import defaultdict
 
+#clipboard stuff
+import base64
+import os
+import subprocess
+
 def load_frequency_data(file_path: str | Path) -> list[list[Any]]:
     """Load the JSON array from a file."""
     with open(file_path, "r", encoding="utf-8") as file:

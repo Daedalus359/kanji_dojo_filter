@@ -22,6 +22,8 @@ def iterate_deck_rows(
         raise RuntimeError(f"Could not find table {table_name!r}")
 
     column_names = [column[1] for column in table_info]
+    print(f"Column names in table {table_name}:")
+    print(column_names)
     try:
         kanji_index = column_names.index("kanji_reading")
         kana_index = column_names.index("kana_reading")
@@ -35,7 +37,17 @@ def iterate_deck_rows(
     for row in rows:
         expression = filter_lib.normalize(row[kanji_index])
         reading = filter_lib.normalize(row[kana_index])
-        if not expression or not reading:
+        if reading and not expression:
+            pass
+            # print("Expecting kana-only word:")
+            # print(row)
+        elif expression and not reading:
+            print(f"Expression ({expression}) but no reading ({reading})")
+            breakpoint()
+            continue
+        elif not expression and not reading:
+            print(f"No expression ({expression}) and no reading ({reading})")
+            breakpoint()
             continue
         yield expression, reading, row, column_names
 
@@ -54,9 +66,19 @@ def load_deck_pairs(
 
     pair_set = set()
     with sqlite3.connect(database_path) as connection:
-        for expression, reading, _row, _columns in iterate_deck_rows(
+        for expression, reading, row, columns in iterate_deck_rows(
             connection, source_table
         ):
-            pair_set.add((expression, reading))
+            # if expression == "明日":
+            #     print(expression, reading, row, columns)
+            pair_set.add((expression, reading, row))
+
+    # ashita_ct = 0
+    # for err in pair_set:
+    #     if err[0] == "明日":
+    #         ashita_ct += 1
+    #         if ashita_ct > 1:
+    #             print("too many ashitas in pair_set!")
+    #             #breakpoint()
 
     return pair_set

@@ -77,24 +77,29 @@ def main() -> None:
     args = parser.parse_args()
 
     try:
-        results = evaluate_deck(
+        (results, pair_set_with_rows) = evaluate_deck(
             database_path=args.database,
             source_table=args.source_table,
             jmdict_directory=args.jmdict_directory,
             frequency_data_path=args.frequency_data,
             weights=None,  # Use default weights
             threshold=args.threshold,
+            prompt_for_cached_output=True,
         )
     except (FileNotFoundError, RuntimeError, ValueError) as exc:
         print(f"Error: {exc}", file=sys.stderr)
         raise SystemExit(2)
 
+
+
     print_report(
         results,
+        pair_set_with_rows=pair_set_with_rows,
         output_format=args.format,
         output_file=args.output,
         verbose=args.verbose,
         summary=args.summary,
+
     )
 
     # for result in results:
